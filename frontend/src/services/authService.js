@@ -1,4 +1,4 @@
-const BASE_URL = https://backend-79cf.vercel.app/
+const BASE_URL = "https://backend-79cf.vercel.app/"
 export const login = async (userData) => {
     const response = await fetch(`${BASE_URL}/auth/login`, {
         method: "POST",
