@@ -78,7 +78,7 @@ const connectDB = async () => {
 connectDB();
 
 // Test Route
-app.get("/", (req, res) => {
+app.get("/api", (req, res) => {
   res.json({ message: "🚀 Secure Voting API is Running!" });
 });
 
