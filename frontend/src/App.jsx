@@ -11,7 +11,7 @@ import AdminDashboard from './components/admin/AdminDashboard';
 import ErrorBoundary from './components/common/ErrorBoundary';
 import AppBar from './components/layout/AppBar';
 import { Box } from '@mui/material';
-import CandidatesList from "./CandidatesList"; // ✅ Import the component
+import CandidatesList from './components/candidates/CandidatesList';
 
 function App() {
   return (
@@ -33,9 +33,9 @@ function App() {
               <Route path="/admin/dashboard/*" element={<AdminDashboard />} />
               <Route path="/user/login" element={<UserLogin />} />
               <Route path="/user/dashboard" element={<UserDashboard />} />
+              <Route path="/candidates" element={<CandidatesList />} />
               <Route path="*" element={<Navigate to="/" />} />
             </Routes>
-            <CandidatesList /> {/* ✅ Add the component inside */}
           </Box>
         </Box>
       </Router>
