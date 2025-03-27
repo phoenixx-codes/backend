@@ -10,6 +10,8 @@ import {
   Alert
 } from "@mui/material";
 
+const BASE_URL = "https://backend-k4h8.vercel.app/api";
+
 function CandidatesList() {
   const [candidates, setCandidates] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -19,7 +21,7 @@ function CandidatesList() {
     const fetchCandidates = async () => {
       try {
         setLoading(true);
-        const response = await fetch(`${process.env.REACT_APP_API_URL || 'http://localhost:5000'}/candidates`);
+        const response = await fetch(`${BASE_URL}/candidates`);
         if (!response.ok) {
           throw new Error('Failed to fetch candidates');
         }
