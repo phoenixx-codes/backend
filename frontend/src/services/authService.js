@@ -1,3 +1,12 @@
+const BASE_URL = "https://backend-79cf.vercel.app/"
+export const login = async (userData) => {
+    const response = await fetch(`${BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(userData),
+    });
+    return response.json();
+};
 // Mock authentication service to replace Firebase
 const ADMIN_USER = {
   email: 'admin@voting-system.com',
