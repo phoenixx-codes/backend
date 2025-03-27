@@ -27,6 +27,8 @@ const corsOptions = {
       'http://127.0.0.1:5173',         // Local development alternative
       'http://127.0.0.1:3000',         // Local development alternative
       process.env.FRONTEND_URL,        // Production frontend URL
+      'https://secure-voting-gdg.netlify.app', // Netlify frontend
+      'https://backend-k4h8.vercel.app' // Vercel backend
     ].filter(Boolean); // Remove any undefined values
     
     // Check if the origin is allowed
@@ -47,7 +49,7 @@ app.use(cors(corsOptions));
 // MongoDB Connection with improved options and retry logic
 const connectDB = async () => {
   try {
-    await mongoose.connect(process.env.MONGO_URI, {
+    const options = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       serverSelectionTimeoutMS: 5000,
@@ -55,8 +57,17 @@ const connectDB = async () => {
       family: 4,
       maxPoolSize: 10,
       minPoolSize: 5
-    });
-    console.log("✅ Connected to MongoDB");
+    };
+
+    // Add additional options for Atlas connection
+    if (process.env.MONGO_URI.includes('mongodb+srv://')) {
+      options.ssl = true;
+      options.retryWrites = true;
+      options.w = 'majority';
+    }
+
+    await mongoose.connect(process.env.MONGO_URI, options);
+    console.log(`✅ Connected to MongoDB (${process.env.NODE_ENV} mode)`);
   } catch (err) {
     console.error("❌ MongoDB connection error:", err);
     // Retry connection after 5 seconds
@@ -68,13 +79,13 @@ connectDB();
 
 // Test Route
 app.get("/", (req, res) => {
-  res.send("🚀 Secure Voting API is Running!");
+  res.json({ message: "🚀 Secure Voting API is Running!" });
 });
 
 // Routes
-app.use("/users", userRoutes);
-app.use("/candidates", candidateRoutes);
-app.use("/votes", voteRoutes);
+app.use("/api/users", userRoutes);
+app.use("/api/candidates", candidateRoutes);
+app.use("/api/votes", voteRoutes);
 
 // Authentication Middleware with token expiration check
 const authenticate = (req, res, next) => {
@@ -104,7 +115,7 @@ const authenticate = (req, res, next) => {
 };
 
 // Protect voting route
-app.post("/votes/vote", authenticate, (req, res) => {
+app.post("/api/votes/vote", authenticate, (req, res) => {
   res.json({ message: "Vote recorded!" });
 });
 
