@@ -49,6 +49,10 @@ app.use(cors(corsOptions));
 // MongoDB Connection with improved options and retry logic
 const connectDB = async () => {
   try {
+    console.log("🔄 Attempting to connect to MongoDB...");
+    console.log("📝 Connection URI:", process.env.MONGO_URI ? "URI is set" : "URI is not set");
+    console.log("🌍 Environment:", process.env.NODE_ENV);
+
     const options = {
       useNewUrlParser: true,
       useUnifiedTopology: true,
@@ -64,16 +68,45 @@ const connectDB = async () => {
       options.ssl = true;
       options.retryWrites = true;
       options.w = 'majority';
+      console.log("🔒 Using Atlas connection with SSL");
     }
 
-    await mongoose.connect(process.env.MONGO_URI, options);
-    console.log(`✅ Connected to MongoDB (${process.env.NODE_ENV} mode)`);
+    const connection = await mongoose.connect(process.env.MONGO_URI, options);
+    console.log(`✅ Successfully connected to MongoDB!`);
+    console.log(`📊 Database Name: ${connection.connection.name}`);
+    console.log(`🔌 Host: ${connection.connection.host}`);
+    console.log(`🔄 Connection State: ${connection.connection.readyState === 1 ? 'Connected' : 'Disconnected'}`);
+    
+    // Test the connection by listing collections
+    const collections = await connection.connection.db.listCollections().toArray();
+    console.log("📚 Available Collections:", collections.map(c => c.name));
+    
   } catch (err) {
-    console.error("❌ MongoDB connection error:", err);
+    console.error("❌ MongoDB connection error:", err.message);
+    console.error("🔍 Error details:", {
+      name: err.name,
+      code: err.code,
+      stack: err.stack
+    });
     // Retry connection after 5 seconds
+    console.log("🔄 Retrying connection in 5 seconds...");
     setTimeout(connectDB, 5000);
   }
 };
+
+// Add connection event listeners
+mongoose.connection.on('error', err => {
+  console.error('❌ MongoDB connection error:', err);
+});
+
+mongoose.connection.on('disconnected', () => {
+  console.log('⚠️ MongoDB disconnected. Attempting to reconnect...');
+  connectDB();
+});
+
+mongoose.connection.on('connected', () => {
+  console.log('✅ MongoDB connected successfully');
+});
 
 connectDB();
 
