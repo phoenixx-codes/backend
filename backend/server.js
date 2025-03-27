@@ -119,6 +119,41 @@ app.get("/api", (req, res) => {
   res.json({ message: "🚀 Secure Voting API is Running!" });
 });
 
+// Add MongoDB connection test endpoint
+app.get("/api/test-db", async (req, res) => {
+  try {
+    const connectionState = mongoose.connection.readyState;
+    const state = {
+      0: 'disconnected',
+      1: 'connected',
+      2: 'connecting',
+      3: 'disconnecting'
+    }[connectionState];
+
+    const collections = await mongoose.connection.db.listCollections().toArray();
+    
+    res.json({
+      status: 'success',
+      message: 'MongoDB Connection Test',
+      connectionState: state,
+      database: mongoose.connection.name,
+      host: mongoose.connection.host,
+      collections: collections.map(c => c.name),
+      environment: process.env.NODE_ENV,
+      mongoUriSet: !!process.env.MONGO_URI
+    });
+  } catch (error) {
+    res.status(500).json({
+      status: 'error',
+      message: 'MongoDB Connection Test Failed',
+      error: error.message,
+      connectionState: mongoose.connection.readyState,
+      environment: process.env.NODE_ENV,
+      mongoUriSet: !!process.env.MONGO_URI
+    });
+  }
+});
+
 // Routes
 app.use("/api/users", userRoutes);
 app.use("/api/candidates", candidateRoutes);
